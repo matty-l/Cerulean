@@ -23,7 +23,12 @@ size = lambda x:shape(x)
 
 
 def reconstruct( x, y, batchsize=50, numepochs=10, architecture=[784,100,10]):
-	""" Returns an inverted form of the network """
+	""" Returns an inverted form of the network.
+
+		This technique was developed by Carlos Vallespi and Carl Welington's 
+		team at NREC at Carnegie mellon in the summer of 2014. They are awesome
+		people.
+	"""
 	
 	size = architecture
 	assert len(size) == 3,  "Only able to do 3-layer reconstructions right now"
