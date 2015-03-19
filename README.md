@@ -1,5 +1,7 @@
 # Cerulean
 
+The result of this project is to be able to take a few pictures (randomly chosen from web scrapes) of a given object, identified only by its name, and automatically create a 3D model of representing the object.
+
 This project contains a neural network made by Matthew Levine some time in Winter 2015. The network is a simple mlp with some advanced hyperparameters like dropout.
 
 This implementation is influenced a lot by the terrific matlab implementation by Rasmussen. Right now, this is pretty slow; I dream of moving large parts of it to C (specifically the costly parts). 
