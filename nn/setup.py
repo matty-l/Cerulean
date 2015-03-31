@@ -71,8 +71,8 @@ class NeuralNetwork:
 
 		
 		
-def nnsetup( architecture, **kwargs ):
-	""" Creates a feed forward back-propogate Nueral Network.
+def setup( architecture, **kwargs ):
+	""" Factory method for a feed forward back-propogate Nueral Network.
 		
 		Returns a neural network where n is the number of elements in the 
 		architecture. Layers, architecture is a n x 1 vvector of layer sizes,

@@ -9,7 +9,7 @@ from numpy import shape, float as npfloat, zeros, mean
 from numpy.random import permutation as randperm, random as rand
 from time import time
 
-from nnff import nnff
+from feedforward import feedforward
 
 from training.nnbp import nnbp
 from training.nnapplygrads import nnapplygrads
@@ -27,7 +27,7 @@ def disp(*words):
 	if __verbose__: print(words)
 
 
-def nntrain( nn, train_x, train_y, opts, val_x=None, val_y=None):
+def train( nn, train_x, train_y, opts, val_x=None, val_y=None):
 	""" This function trains a neural network
 	
 		Trains a neural network in place through feed-forward back propogation
@@ -81,7 +81,7 @@ def nntrain( nn, train_x, train_y, opts, val_x=None, val_y=None):
 				
 			batch_y = train_y[ kk[l * batchsize : (l+1) * batchsize], : ]
 			
-			nnff( nn, batch_x, batch_y )
+			feedforward( nn, batch_x, batch_y )
 			nnbp(nn)
 			nnapplygrads(nn)
 			
@@ -133,7 +133,7 @@ if __name__ == 'Terminal' or __name__ == '__main__':
 	
 	sample_size = 1000
 	
-	from nnsetup import nnsetup
+	from setup import setup as nnsetup
 	from numpy import array, float
 	from random import random
 	from scipy.io import loadmat
@@ -150,7 +150,7 @@ if __name__ == 'Terminal' or __name__ == '__main__':
 	y = y[:sample_size,:]
 	
 	print("training data...")
-	nntrain( nn, x, y, opts )
+	train( nn, x, y, opts )
 		
 	from utils.plotter import drawnow
 	drawnow(True)
