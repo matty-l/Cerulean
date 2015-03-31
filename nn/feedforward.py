@@ -10,7 +10,7 @@ from numpy.random import random as rand
 
 from utils.utils import add
 
-def nnff(nn,x,y):
+def feedforward(nn,x,y):
 	""" Performs a feedforward pass.
 	
 	If this function throws an exception, it's almost definately because of
