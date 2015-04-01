@@ -146,8 +146,8 @@ if __name__ == 'Terminal' or __name__ == '__main__':
 	y = result['train_y'].astype(float)
 	
 	# downsample for testing
-	x = x[:sample_size,:]
-	y = y[:sample_size,:]
+	# x = x[:sample_size,:]
+	# y = y[:sample_size,:]
 	
 	print("training data...")
 	train( nn, x, y, opts )

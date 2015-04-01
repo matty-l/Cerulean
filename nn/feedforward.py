@@ -8,7 +8,13 @@
 from numpy import shape, array, ones, mean, sum, log, exp, max
 from numpy.random import random as rand
 
-from utils.utils import add
+from utils.utils import addBias
+
+# ------------------------------------------ #
+# Notes on performance:						 #
+# Using utils.utils.add: 11.2444s			 #
+# Using utils.utils.addBias: 4.4405s		 #
+# ------------------------------------------ #
 
 def feedforward(nn,x,y):
 	""" Performs a feedforward pass.
@@ -24,7 +30,7 @@ def feedforward(nn,x,y):
 	n = nn.n
 	m = x.shape[0]
 
-	x = add(ones((m,1)),x)
+	x = addBias(x)
 	nn.a[0] = x
 	
 	# feed forward pass
@@ -41,7 +47,7 @@ def feedforward(nn,x,y):
 				nn.a[i] = nn.a[i] * nn.dropOutMask[i]
 								
 		# add the bias term
-		nn.a[i] = add( ones((m,1)), nn.a[i] )
+		nn.a[i] = addBias(nn.a[i])
 		
 	nn.a[n-1] = nn.output_function.feedforward(nn.a[n-2],nn.W[n-2])
 

@@ -5,8 +5,8 @@
 	Date: 03/15/2015
 """
 
-from nnsetup import nnsetup
-from nntrain import nntrain,Opts
+from setup import setup as nnsetup
+from train import train as nntrain,Opts
 from feedforward import feedforward as nnff
 
 from numpy import array, float, shape, zeros
@@ -100,7 +100,7 @@ def test_recon(x=None,y=None,dim=128,batches=80, downsample=False):
 
 	if x is None and y is None:
 		from scipy.io import loadmat
-		print("Loading data...")
+
 		# result = loadmat('mnist_uint8.mat')
 		result = loadmat('ducky.mat')
 
@@ -133,4 +133,4 @@ def test_recon(x=None,y=None,dim=128,batches=80, downsample=False):
 
 	
 if __name__ == '__main__':
-	test_recon()
+	test_recon(downsample=0)

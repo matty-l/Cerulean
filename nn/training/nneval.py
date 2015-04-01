@@ -4,7 +4,7 @@
 	Author: Matthew Levine
 	Date: 02/02/2015
 """
-from nnff import nnff
+from feedforward import feedforward
 from training.nntest import nntest
 
 def nneval( nn, loss, train_x, train_y, val_x=None, val_y=None):
@@ -19,14 +19,14 @@ def nneval( nn, loss, train_x, train_y, val_x=None, val_y=None):
 	# training performance
 	nn = nn.copy() # don't change the input nn
 	# print('starting')
-	nnff( nn, train_x, train_y )
+	feedforward( nn, train_x, train_y )
 	loss.train.e.append( nn.L )
 	# print("stopping")
 	# exit()
 	
 	# validation performance
 	if nargin == 6:
-		nn = nnff(nn,val_x,val_y)
+		nn = feedforward(nn,val_x,val_y)
 		loss.val.e.append( nn.L )
 		
 	nn.testing = 0

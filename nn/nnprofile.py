@@ -1,5 +1,8 @@
 """
-	This file profiles various functions in the nn libary
+	This file profiles various functions in the nn libary.
+	
+	This file is prefaced with "nn", unlike others in the root directory,
+	to disambiguate it with the built-in "profile" module (called within)
 	
 	Author: Matthew Levine
 	Date: 03/24/2015

@@ -5,7 +5,7 @@
 	Date: 02/02/2015
 """
 
-from nnff import nnff
+from feedforward import feedforward
 from numpy import zeros, shape
 
 size = lambda x:shape(x)
@@ -18,7 +18,7 @@ def nnpredict(nn,x):
 	"""
 	nn.testing = 1
 	nn = nn.copy()
-	nnff( nn, x, zeros( (size(x)[0], nn.size[-1] ) ) )
+	feedforward( nn, x, zeros( (size(x)[0], nn.size[-1] ) ) )
 	nn.testing = 0
 	
 	i = max( nn.a.keys() )
