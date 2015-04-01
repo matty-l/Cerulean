@@ -5,9 +5,9 @@
 	Date: 11/28/2014
 """
 
-from Scanner.PyRules import Rule, getRules,CommentType
-from Scanner.Token import PyToken, EOFToken, ErrorToken
-from Scanner.TokenType import PyTokenType
+from Environment.Scanner.PyRules import Rule, getRules,CommentType
+from Environment.Scanner.Token import PyToken, EOFToken, ErrorToken
+from Environment.Scanner.TokenType import PyTokenType
 
 class PyLex:
 	""" Scanner/lexer reliant on the rules from the "Rules" module

@@ -6,13 +6,13 @@
 """
 
 import tkinter.ttk as ttk
-from ScrolledLinedText import ScrolledLinedText
-from Scanner.Scanner import PyLex
-from Scanner.Style import PyStyle
+from Environment.ScrolledLinedText import ScrolledLinedText
+from Environment.Scanner.Scanner import PyLex
+from Environment.Scanner.Style import PyStyle
 import tkinter as tk
 
-from FindDialog import FindDialog
-from GotoDialog import GotoDialog
+from Environment.FindDialog import FindDialog
+from Environment.GotoDialog import GotoDialog
 
 import tkinter.filedialog as fileDialog
 
@@ -24,7 +24,7 @@ class PageList:
 		self.maxid = 0
 		self.book = notebook
 	
-	def append( self, open=False, filename=None, run=lambda:0 ):
+	def append( self, open=False, filename=None, run=lambda e:0, profile=lambda e:0 ):
 		""" Adds a new page to the list and returns it followed by its name"""
 		id = self.maxid
 		self.maxid += 1
@@ -33,6 +33,9 @@ class PageList:
 		# allow the page to be run using control-r
 		self.page_list[id].input.bind("<Control-r>",
 			lambda e:run(self.page_list[id].input.get('1.0',tk.END)))
+		# allow the page to be debugged
+		self.page_list[id].input.bind('<Control-d>',
+			lambda e:profile(self.page_list[id].input.get('1.0',tk.END)))
 		return self.page_list[id]
 	
 	def delete( self, *ids ):

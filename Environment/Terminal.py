@@ -15,7 +15,7 @@ from threading import Timer
 # for terminal access
 import numpy
 import math
-from global_functions import get_default_functions, set_locals, set_terminal, get_nonlocals
+from Environment.global_functions import get_default_functions, set_locals, set_terminal, get_nonlocals
 
 # the keycode for backspaces
 BACKSPACE = 22
@@ -94,7 +94,7 @@ class PyTerminal:
 			except SyntaxError:
 				captured = 0
 			if not captured: # we don't want nested exceptions to print
-				exec(input,globals(),globals())
+				exec(input,globals(),globals())				
 				
 			for key,val in locals().items(): # save new variables
 				if key != 'old_locals' and key not in old_locals:

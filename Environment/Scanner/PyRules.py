@@ -8,8 +8,8 @@
 """
 
 import regex
-from Scanner.Style import PyStyle
-from Scanner.TokenType import PyTokenType
+from Environment.Scanner.Style import PyStyle
+from Environment.Scanner.TokenType import PyTokenType
 	
 	
 class Rule:
