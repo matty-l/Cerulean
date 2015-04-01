@@ -5,8 +5,8 @@
 	Date: 03/24/2015
 """
 
-from nnsetup import nnsetup
-from nntrain import nntrain, Opts
+from setup import setup
+from train import train, Opts
 
 from numpy import array, float
 from random import random
@@ -23,7 +23,7 @@ def nnprofile( stage_name ):
 
 def profile_nntrain( ):
 	""" Profiles the setup and training of a neural network """
-	nn = nnsetup([784, 100, 10])
+	nn = setup([784, 100, 10])
 	
 	opts = Opts()
 	opts.batchsize = 50
@@ -36,7 +36,7 @@ def profile_nntrain( ):
 	print("Loading data...")
 	result = loadmat('mnist_uint8.mat')
 	
-	nn = nnsetup([784,100,10])
+	nn = setup([784,100,10])
 	x = result['train_x'].astype(float) / 255
 	y = result['train_y'].astype(float)
 	
@@ -45,7 +45,7 @@ def profile_nntrain( ):
 	y = y[:sample_size,:]
 	
 	print("training data...")
-	nntrain( nn, x, y, opts )
+	train( nn, x, y, opts )
 
 if __name__ == '__main__':
 	nnprofile('profile_nntrain')
