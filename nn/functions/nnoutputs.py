@@ -8,6 +8,7 @@ from abc import ABCMeta, abstractmethod
 from utils.utils import Overrides
 from numpy import sum, log
 from numpy import exp, max, sum
+from linalg.CeLinalg import dot as cdot
 
 
 class OutputFunction(object):
@@ -25,7 +26,7 @@ class OutputFunction(object):
 	@staticmethod
 	def factory( classname ):
 		mapf = {'softmax':SoftmaxOutput,'sigm':SigmoidOutput}
-		assert classname in mapf, 'Cannot produce unkown function'+str(classname)
+		assert classname in mapf, 'Cannot produce unknown function'+str(classname)
 		return mapf[classname]()
 			
 	
@@ -52,14 +53,14 @@ class SoftmaxOutput(OutputFunction):
 
 			return x
 			
-		return softmax(layer.dot(weights.transpose()))
+		return softmax(cdot(layer,weights.transpose()))
 		
 		
 class SigmoidOutput(OutputFunction):
 	
 	@Overrides(OutputFunction)
 	def back_propogate(self, error, layer):
-		return - e * (layer * (1-layer))
+		return - error * (layer * (1-layer))
 		
 	@Overrides(OutputFunction)
 	def evaluate_loss(self, error, m, layer, y ):
@@ -68,4 +69,4 @@ class SigmoidOutput(OutputFunction):
 	@Overrides(OutputFunction)
 	def feedforward( self, layer, weights ):
 		sigm = lambda P : 1 / (1+exp(-P))
-		return sigm(layer.dot(weights.transpose()))
+		return sigm(cdot(layer,weights.transpose()))

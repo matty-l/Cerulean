@@ -14,12 +14,19 @@ import tkinter.filedialog as fileDialog
 import pickle
 import time
 from multiprocessing import Process
+import os
+from subprocess import PIPE, Popen
+
+from random import randint
+from codecs import encode
 
 # IDE Sub-Tools
 import Environment.Terminal as Terminal
 from Environment.Page import PageList
 from Environment.ModuleGrapher import ModuleGrapher
 from Environment.Profiler import display_profile
+
+from nn.setup import NeuralNetwork
 
 global_default = list(Terminal.global_default.keys())[:]
 
@@ -41,7 +48,9 @@ class DesktopController:
 		self.root.protocol("WM_DELETE_WINDOW", self.close)
 		self.root.bind("<Control-q>",self.close)
 		
-		self.reopen()
+		self.reopen()	
+		tk.getRoot = lambda : self.w['right_frame']['bottom']
+		NeuralNetwork.watch(lambda:self.root.update())
 		root.mainloop()
 		
 	def close( self ):
@@ -82,9 +91,33 @@ class DesktopController:
 			'main' : tk.Frame(self.root,height=500,borderwidth=2,
 				relief='sunken'),
 		}
+		mf = self.w['right_frame']['main']
+		self.w['right_frame'].update({
+			'vtop' : tk.PanedWindow(mf,height=20,borderwidth=2,relief='sunken'),
+			'top' : tk.PanedWindow(mf,height=80,borderwidth=2,relief='sunken'),
+			'bottom' : tk.Frame(mf,height=100,borderwidth=2,relief='sunken')
+		})
 		rframe = self.w['right_frame']
 		
-		rframe['main'].pack(side='right',expand=0,fill='y')
+		mf.pack(side='right',expand=0,fill='y')
+		rframe['vtop'].pack(side='top',expand=0,fill='both')
+		def getTimes():
+			times = Popen(["cmd","/c","python","cputimes.py"], 
+				stdout=PIPE).communicate()[0].decode('utf-8')[1:-3].replace(',',' ')
+			return [float(t) for t in times.split()]
+	
+				
+		num_procs = len(getTimes())
+		rframe['vlabel'] = [tk.Label(rframe['vtop']) for i in range(num_procs)]
+		[l.pack(side='left',expand=1,fill='x') for l in rframe['vlabel']]
+		
+		rframe['top'].pack(side='top',expand=0,fill='both')
+		toplabel = tk.Label(rframe['bottom'],relief='sunken')
+		toplabel.grid(row=0,sticky='ew')		
+		
+		rframe['bottom'].title = lambda s : toplabel.config(text=s)		
+		rframe['bottom'].pack(side='bottom',expand=0,fill='both')
+		
 		
 		# what function to use when sorting the pane
 		self.update_key = lambda e : e[0]
@@ -93,7 +126,7 @@ class DesktopController:
 		def update_variable_pane(globals):
 			""" Updates the variable pane """
 			# clear current labels
-			[el.grid_forget() for el in rframe['main'].grid_slaves()]
+			[el.grid_forget() for el in rframe['top'].grid_slaves()]
 			
 			# Allow viewing of variables
 			def view_vars(event,globals=globals):
@@ -104,8 +137,16 @@ class DesktopController:
 					val in globals.items() if key not in global_default}
 				ModuleGrapher().graph(plottables,popup).pack()
 				popup.mainloop()
+			
+			# tohex = lambda rgb : '0x'+encode(bytes("".join(map(chr, rgb)),'UTF-8'),'hex_codec').decode("utf-8")
+			times = getTimes()
+			tohex = lambda rgb : '#%02x%02x%02x' % rgb
+			for label, time in zip(rframe['vlabel'],times):
+				label.config(bg=tohex((time,50,randint(0,255))))
+			# rframe['vlabel'].config(text=' '.join(['CPU'+str(i)+': '+str(t) for i,
+											# t in enumerate(os.times())]))
 				
-			rframe['main'].bind("<Button-3>",view_vars)
+			rframe['top'].bind("<Button-3>",view_vars)
 
 			# title bar
 			def setkey(newkey,x):
@@ -114,17 +155,17 @@ class DesktopController:
 				self.reverse_key = not self.reverse_key
 				self.update_variable_pane(globals)
 				
-			tk.Button(rframe['main'],width=10,height=0,text="Class",font='"DejaVu Sans" 9 bold',
+			tk.Button(rframe['top'],width=10,height=0,text="Class",font='"DejaVu Sans" 9 bold',
 				relief='sunken',borderwidth=1,
 					command=lambda : setkey(lambda obj : str(type(obj[1]))[8:-2],'class') 
 						).grid(row=0,column=0,sticky='ew')
 			
-			tk.Button(rframe['main'],width=10,text="Name",font='"DejaVu Sans" 9 bold',
+			tk.Button(rframe['top'],width=10,text="Name",font='"DejaVu Sans" 9 bold',
 				relief='sunken',borderwidth=2,
 					command = lambda: setkey(lambda obj : obj[0],'name') 
 						).grid(row=0,column=1,sticky='ew')
 			
-			tk.Button(rframe['main'],width=10,text="Value",font='"DejaVu Sans" 9 bold',
+			tk.Button(rframe['top'],width=10,text="Value",font='"DejaVu Sans" 9 bold',
 				relief='sunken',borderwidth=2,
 					command=lambda: setkey(lambda obj :str(obj[1]),'value')
 						).grid(row=0,column=2,sticky='ew')
@@ -137,15 +178,16 @@ class DesktopController:
 				if varname in global_default: continue
 
 				# class of variable
-				tk.Label(rframe['main'],text=str(type(variable))[8:-2],
+				tk.Label(rframe['top'],text=str(type(variable))[8:-2],
 					relief='sunken',borderwidth=2).grid(row=i,column=0,sticky='ew')
 				# name of variable
-				tk.Label(rframe['main'],text=varname,
+				tk.Label(rframe['top'],text=varname,
 					relief='sunken',borderwidth=2).grid(row=i,column=1,sticky='ew')
 				# variable
-				tk.Label(rframe['main'],text=str(variable)[:min(len(str(variable)),
+				tk.Label(rframe['top'],text=str(variable)[:min(len(str(variable)),
 					10)],relief='sunken',borderwidth=2).grid(row=i,column=2,sticky='ew')
 				i += 1
+				if i > 15: break # only show so many
 			
 		update_variable_pane(None)
 		self.update_variable_pane = update_variable_pane
@@ -171,7 +213,8 @@ class DesktopController:
 		menu = self.w['menu'] = { 'main': tk.Menu(self.root) }
 		self.w['menu'].update({
 				'File':tk.Menu(menu['main'],tearoff=0),
-				'Settings':tk.Menu(menu['main'],tearoff=0)
+				'Settings':tk.Menu(menu['main'],tearoff=0),
+				'Help':tk.Menu(menu['main'],tearoff=0)
 			})
 		for name,item in sorted(self.w['menu'].items()):
 			if item is not menu['main']:
@@ -180,7 +223,8 @@ class DesktopController:
 		actions = [ ('File','New',self.add_page),
 					('File','Open',lambda:self.add_page(open=True)),
 					('File','Close',lambda:self.close_page()),
-					('Settings','Style',lambda:self.open_style())
+					('Settings','Style',lambda:self.open_style()),
+					('Help','Shortcuts',lambda:self.show_shortcuts())
 				  ]
 		
 		for menu_name,name,event in actions:
@@ -191,6 +235,26 @@ class DesktopController:
 	def open_style(self):
 		""" Opens the style dialog """
 		self.add_page(open=True,filename='Scanner/Style.py')
+		
+	def show_shortcuts(self):
+		""" Shows the shortcuts in a popup """
+		pop = tk.Toplevel()
+		pop.title("Help: Shortcuts")
+		tk.Message(pop,text='Control+n     New Page'+\
+							'\nControl+o     Open Page'+\
+							'\nControl+w     Close Page'+\
+							'\nControl+q     Quit Program'+\
+							'\n\nControl+p     Clear Terminal'+\
+							'\nControl+r     Run Code'+\
+							'\nB3 (Var Pane)     Archtiecture Graph'+\
+							'\nControl+d     Profile Code\n'+\
+							'\n\nControl+f     Find'+\
+							'\nControl+g     Goto'+\
+							'\nControl+z     Undo'+\
+							'\nControl+y     Redo').grid()
+		pop.bind('<Escape>',lambda e:pop.destroy())
+		
+		
 		
 	def build_notebook( self ):
 		""" Builds the notebook frame on the left """

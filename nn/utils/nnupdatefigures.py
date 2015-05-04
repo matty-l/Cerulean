@@ -4,7 +4,8 @@
 	Author: Matthew Levine
 	Date: 02/03/2015
 """
-from utils.plotter import figure, plot, xlabel, ylabel, title, legend, subplot, drawnow
+from utils.plotter import figure, plot, xlabel, ylabel, title, legend, subplot,\
+							drawnow, get_statusbar
 
 def nnupdatefigures(nn,fhandle,L,opts,i):
 	""" Updates figures during training """
@@ -42,19 +43,27 @@ def nnupdatefigures(nn,fhandle,L,opts,i):
 		# plotting
 		figure(fhandle)
 		if nn.output == 'softmax':
-			subplot(1)
+			# subplot(1)
 
-			plot(plot_x,[p/3 for p in plot_yfrac])
+			plot(plot_x,[p for p in plot_yfrac])
 			xlabel('Number of epochs')
 			ylabel('Misclassification rate')
 			title('Misclassification rate')
-			subplot(0)
-			
-		plot(plot_x,plot_ye)
-		xlabel('Number of epochs')
-		ylabel('Error')
-		title('Error')
+			# subplot(0)
+		else:	
+			plot(plot_x,plot_ye)
+			xlabel('Number of epochs')
+			ylabel('Error')
+			title('Error')
 		
 		drawnow()
 		
-			
+def nnupdatestatus(iter,maxiter):
+	""" Checks for a global status bar; if it finds it, updates it with the
+		iter value
+	"""
+	bar = get_statusbar()
+	if bar is not None:
+		bar['value'] = iter
+		bar['maximum'] = maxiter
+		bar.update()

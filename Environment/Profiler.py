@@ -44,6 +44,7 @@ class ProfileDisplay(tk.Frame):
 		self.profile_out = ''
 		self.sort_index = -1
 		self.reversed = 0
+		self.total_time = 0
 		
 		self.update_headers()
 	
@@ -57,13 +58,14 @@ class ProfileDisplay(tk.Frame):
 
 
 		curOpt = tk.StringVar(self.master)
-		curOpt.set('Sort Preference')
+		curOpt.set('Sort Preference (Time: '+str(self.total_time)[:5]+')')
 
 		sort_opts = tk.OptionMenu( self.master, curOpt, *self.profile_headers)
 		curOpt.trace( 'w', lambda a,b,c:self.sort(comp[curOpt.get()]) )
 		
-		sort_opts.grid()
-			
+		sort_opts.grid(row=0)
+		self.headers.append(sort_opts)
+		
 	def sort( self, col_index ):
 		self.sort_index = col_index
 		self.update_table()
@@ -91,12 +93,18 @@ class ProfileDisplay(tk.Frame):
 		self.profile_out = profile_out.split('(function)')[1]
 		
 		self.update_table()
+		self.total_time = tf	
+		self.update_headers()
 		
 		# cleanup
 		assert '_function_' in globals(), 'The profile complete successfully but crashed in cleanup'
 		del globals()['_function_']
 		del __builtins__['_function_']
-		print("Total time: ",tf)
+
+		def toggle(event=None):
+			self.reversed = not self.reversed
+			self.update_table()
+		self.bind("<r>",toggle)		
 		
 	def update_table( self ):
 		""" Updates the text in the table view with the last profile information

@@ -34,7 +34,10 @@ class __Figure:
 
 	def __init__( self ):
 		""" Creates a new figure """
-		self.win = tk.Tk()
+		if 'getRoot' in dir(tk):
+			self.win = tk.getRoot()
+		else:
+			self.win = tk.Tk()
 		self.frame = tk.Frame(self.win,relief='sunken',borderwidth=3)
 				
 		self.build()
@@ -46,7 +49,7 @@ class __Figure:
 		
 	def build( self ):
 		""" Builds a new plot in the current frame """
-		(self.width,self.height) = (300,300)
+		(self.width,self.height) = (375,300)
 		self.canvas = tk.Canvas(self.frame,width = self.width, height=self.height)
 		self.title = tk.Label(self.frame)
 		self.xlabel = tk.Label(self.frame)
@@ -141,7 +144,7 @@ def plot(X,Y,color='black'):
 	(last_x,last_y) = (None,None)
 	for x,y in zip(X,Y):
 		new_x = x / maxX * (width-15) + 20
-		new_y = height - (height * y/maxY) + 20
+		new_y = height - (height * y/maxY) + 15
 		can.create_oval( new_x-1, new_y-1, new_x+1, new_y+1, fill=color, outline=color )
 		
 		if last_x is not None and last_y is not None:
@@ -174,10 +177,17 @@ def subplot(column=None):
 		next to the current plot
 	"""
 	handles[cur_handle].subplot(column)
-		
-if __name__ == '__main__':
-	# test code
 
+
+def get_statusbar():
+	""" Returns a tkinter status bar if it is defined, else None """
+	try:
+		return tk.status_bar
+	except:
+		return None
+
+	
+def testplot():
 	from math import sin,cos,fabs,sqrt
 
 	fhandle = figure()
@@ -210,3 +220,10 @@ if __name__ == '__main__':
 	plot(X,Y)	
 	
 	drawnow()
+	
+	tk.mainloop()
+	
+if __name__ == '__main__':
+	# test code
+	testplot()
+

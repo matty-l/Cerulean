@@ -10,14 +10,11 @@ from numpy.random import random as rand
 
 from functions.nnoutputs import OutputFunction
 from functions.nnactivations import ActivationFunctionImpl
-from utils.utils import size
-
-# from nnoutputs import OutputFunction
-# from nnactivations import ActivationFunctionImpl
-# from utils import size
 
 class NeuralNetwork:
 	""" This class is emulates a multi-layer perceptron """
+	
+	observables = [] # note the possibilit of a memory leak
 	
 	def __init__( self, architecture, freeze_init = False, **kwargs ):
 		""" Constructs a new multilayer perceptron """
@@ -28,6 +25,7 @@ class NeuralNetwork:
 		self.learningRate = 2
 		self.momentum = 0.8
 		self.scaling_learningRate = 1
+		self.power_learningRate = 1
 		self.weightPenaltyL2 = 0
 
 		self.inputZeroMaskedFraction = 0
@@ -48,10 +46,13 @@ class NeuralNetwork:
 		self.dropOutMask = {} # move me
 		if freeze_init:
 			return
+			
+		# see https://web.stanford.edu/class/ee373b/nninitialization.pdf for maybe
+		# a better weight function
 		for i in range(1,self.n):
 			# weights and weight momentum
 			self.W[i-1] = (rand((self.size[i],self.size[i-1]+1)) - 0.5) * 2 * 4 * sqrt(6 / (self.size[i] + self.size[i-1]))
-			self.vW[i-1] = zeros((size(self.W[i-1])))
+			self.vW[i-1] = zeros((self.W[i-1].shape))
 			
 			# average activations (for use with sparsity)
 			self.p[i] = zeros((1,self.size[i]))
@@ -68,19 +69,17 @@ class NeuralNetwork:
 		nn.p = {key:val.copy() for key,val in self.p.items()}
 		return nn
 		
-
+	@staticmethod
+	def watch( function ):
+		""" Adds an observable to the network """
+		NeuralNetwork.observables.append(function)
 		
-		
-def setup( architecture, **kwargs ):
-	""" Factory method for a feed forward back-propogate Nueral Network.
-		
-		Returns a neural network where n is the number of elements in the 
-		architecture. Layers, architecture is a n x 1 vvector of layer sizes,
-		e.g., [784, 100, 10]
-	"""
-	return NeuralNetwork(architecture,**kwargs)
+	def update( self ):
+		""" Fires all observables """
+		[observable() for observable in self.observables]
+				
 	
 if __name__ == '__main__':
 	# test code
-	nn = nnsetup([784,100,10],output='sigm')
+	nn = NeuralNetwork([784,100,10],output='sigm')
 	print(nn.output)

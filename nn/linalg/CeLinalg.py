@@ -40,10 +40,11 @@ except ImportError:
 	
 	
 import numpy as np
+from scipy.linalg import get_blas_funcs
 from numpy.random import normal
 import time
 
-__validate__ = True
+__validate__ = False
 	
 class Errors:
 	""" Factory for errors in CeLinalg """
@@ -105,15 +106,29 @@ class ThreadPool(object):
 		
 	def display(self):
 		""" Displays the map """
+		s = ''
 		for u,(i,t) in zip(self.utl,enumerate(self.map)):
-			print(i,'threads','average',t,'seconds','applied',u,'times')
+			su,si,st = str(u),str(i),str(t)
+			s += ' '.join([si,'threads','average',st,'seconds','applied',su,'times','\n'])
+		return s
+			
+	def __del__( self ):
+		""" Cleans up object """
+		# try:
+		file = open('linalg_log.log','a')
+		breakp = ''.join(['-']*50)
+		file.write('\n\n'+breakp+'\n')
+		file.write(self.display())
+		file.write('\n\n'+breakp)
+		file.close()
+		# except: pass # really can't have this cause any trouble during shutdown
 			
 __POOL__ = ThreadPool()	
 
 def use_blocks(flag):	
 	__POOL__.blocks = flag
 
-def dot( A, B ):
+def cdot( A, B ):
 	C = np.zeros((A.shape[0],B.shape[1]))
 	
 	# is this really the best way to handle this?
@@ -131,6 +146,21 @@ def dot( A, B ):
 	if result: raise Exception(Errors.get(result))
 	
 	return C
+	
+def dot( A, B ):
+	""" This function guarantees that matrix multiplciatoin will be computed 
+		using the underlying BLAS implementation. Unless the __validate__ flag
+		is set on the module level, no error-checking is done. This function may
+		be faster that CeLinalg.cdot for large matrices
+	"""
+	
+	if __validate__:
+		debug = np.dot(A,B)
+		assert np.all(debug==C), "ERR: failed to correctly multiply matrices :"+ Errors.state(A,B)
+
+	gemm = get_blas_funcs("gemm",[A,B])
+	return gemm(1,A,B)
+
 	
 	
 if __name__ == '__main__':
@@ -152,7 +182,7 @@ if __name__ == '__main__':
 		
 		__POOL__.display()
 	elif MODE == 'ACCURACY':
-		for p in range(100):
+		for p in range(2):
 			print(p)
 			# print('starting')
 			a = rand.random((50,785))

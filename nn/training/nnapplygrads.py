@@ -15,7 +15,6 @@ def nnapplygrads( nn ):
 	
 	for i in range(nn.n-1):
 		if nn.weightPenaltyL2 > 0:
-			# zs = zeros((size(nn.W[i])[0],1))
 			# apply weight penalty here
 			dW = nn.dW[i] + nn.weightPenaltyL2 * addPenalty(nn.W[i][:,1:])
 		else:

@@ -72,6 +72,14 @@ class PyTerminal:
 		if internal: input=input.replace('self','self.master')
 		old_out = sys.stdout
 		new_out = sys.stdout = StringIO()
+		
+		def write(*sw):
+			output = ''.join([str(s) for s in sw])
+			self.widgets['entry'].insert(END,'\n'+output)
+			self.line_number += output.count('\n')+1
+			self.widgets['entry'].see(END)
+		globals()['print'] = write
+		
 		try:
 			if internal and input == 'exit()': exit(1)
 			if internal and input == 'clear': 
@@ -107,9 +115,7 @@ class PyTerminal:
 			print('Cerebro Exception:',str(e),traceback.format_exc())
 			
 		output = new_out.getvalue()
-		self.widgets['entry'].insert(END,'\n'+output)
-		self.line_number += output.count('\n')+1
-		self.widgets['entry'].see(END)
+		write(output)
 		
 		sys.stdout = old_out
 		self.widgets['entry'].see(END)

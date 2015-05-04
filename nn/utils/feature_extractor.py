@@ -10,8 +10,9 @@ from scipy import ndimage
 from scipy.misc import imread, toimage
 
 import os
+import time
 
-path = 'C:/Users/Dev/Desktop/Cerebro2/images/coil-20-proc'
+path = 'C:/Users/Dev/Desktop/coil-20-proc'
 
 def show(im):
 	if __verbose__:
@@ -25,6 +26,8 @@ class FeatureExtractor:
 		io tasks
 	"""
 
+	NUM_FEATURES = 4
+	
 	def __init__( self, directory=path, pref='', dim=28):
 		""" Make a new feature extractor
 		
@@ -38,9 +41,11 @@ class FeatureExtractor:
 		
 		self.labels   = []		
 		self.labelmeta = [{},0,self.getYDim()]
-		# self.labelmap = {}
-		# self.labelmax = 0
-		# self.ydim = self.getYDim()
+		
+		# the imageset we're trying to reconstruct and how much to bias it
+		self.target = 'obj21'
+		self.bias = 21
+		self.info = [ 0, 0, 0 ] # target, nontarget, total
 		
 		self.n = dim
 		
@@ -55,46 +60,49 @@ class FeatureExtractor:
 		
 	def append(self,feature,fn=''):
 		""" Adds the given feature to the feature list """
-		# add to x
-		self.features.append(feature.reshape(self.n*self.n))
-		
-		# add to y
 		tag = fn.split('_')[0] if len(fn.split('_')) > 0 else ''
-		(lmap,lmax,dim) = self.labelmeta
-		if tag not in lmap:
-			lmap[tag] = lmax
-			self.labelmeta[1] += 1
-		
-		self.labels.append( [ i==lmap[tag] for i in range(dim) ] )
+
+		for k in range( (tag == self.target) * self.bias + 1 ):
+			# add to x
+			if len(feature.shape) > 2:
+				newf = np.zeros(shape=feature.shape[:-1])
+				newf[:,:] = (feature[:,:,0] + feature[:,:,1] + feature[:,:,2])/3
+				feature = newf
+			self.features.append(feature.reshape(self.n*self.n))
+			
+			# add to y
+			(lmap,lmax,dim) = self.labelmeta
+			if tag not in lmap:
+				lmap[tag] = lmax			
+				self.labelmeta[1] += 1			
+			
+			self.labels.append( [ i==lmap[tag] for i in range(dim) ] )
+			
+		self.info[0] += (k != 0)
+		self.info[1] += (k == 0)
+		self.info[2] += 1
 			
 	def extract(self):
 		""" Loops through the path-directory and extracts every image matching
 			the pref's features
 		"""
-		for fn in os.listdir(self.path):
+		maxiter = len(os.listdir(self.path))
+		assert maxiter > 0, 'Invalid file; no images found'
+		for j,fn in enumerate(os.listdir(self.path)):
 			if self.fname == '' or fn.startswith(self.fname):
-				if __verbose__:
-					print(fn)
+				if __verbose__:  print( str(j / maxiter * 100)[:5], ' : ', fn )
 				im = imread(path+'/'+fn)
+								
+				for i,feature in enumerate((im,self.segment(im),self.gaussian(im),self.sob(im))):
+					if i >= FeatureExtractor.NUM_FEATURES: break
+					self.append(feature,fn=fn)				
 				
-				# show(im)
-				
-				for feature in (im,self.gaussian(im),self.sob(im),self.segment(im)):
-					self.append(feature,fn=fn)
-				# self.append(self.gaussian(im))
-				# self.append(self.sob(im))
-				# for thresh in range(2,8):
-					# self.append(self.segment(im,thresh=thresh/10))
-					# show(self.features[-1])
-												
-				# show(im)				
-				
+		if __verbose__: print("Converting to numpy...")
 		self.features = np.array(self.features)
 		self.labels   = np.array(self.labels)
 				
 	def gaussian(self,im,blur=4):
 		""" Applies gaussian blur to the image """
-		# ndimage.rotate(im,15,mode='constant')
 		return ndimage.gaussian_filter(im,4)
 		
 	def sob(self,im):
@@ -117,16 +125,30 @@ class FeatureExtractor:
 		"""
 		return np.zeros((self.features.shape[0],1))
 
-				
-if __name__ == '__main__':
+def test_extraction():
+	""" Applies the extraction process """
 	fe = FeatureExtractor(dim=128)
+	t0 = time.time()
 	fe.extract()
+	tf = time.time() - t0
 	print("Extracting...")
 	print(fe.features.shape)
 	print("Done Extracting")
 	
 	from scipy.io import savemat
-	savemat('ducky',{'train_x':fe.features,'train_y':fe.labels})
-	
+	savemat('C:/Users/Dev/Desktop/ducky2',
+		{'train_x':fe.features,'train_y':fe.labels})
+		
+	assert fe.info[0] + fe.info[1] == fe.info[2], 'Math error occurred in tracking'
+	print("\nTrain_x dimension: ",fe.features.shape,
+		  "\nTrain_y dimension: ",fe.labels.shape,
+		  "\nTotal images processed", fe.info[2],
+		  '\nTotal features processed',fe.info[0]*fe.bias+fe.info[1],
+		  "\nTotal target images processed",fe.info[0],
+		  "\nTotal non-target images processed",fe.info[1],
+		  "\nRatio of target to non-target features:",fe.info[0]*fe.bias / (fe.info[0]*fe.bias+fe.info[1]) )
+	print("Elapsed time:",str(tf)[:5])
+if __name__ == '__main__':
+	test_extraction()
 	# from nninvert import test_recon
 	# test_recon(fe.features,fe.get_solution(),dim=128,batches=81)

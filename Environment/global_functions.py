@@ -6,6 +6,10 @@
 	Date: 3/6/2015
 """
 
+# __future__
+# - Add an edit/open function for terminal access? Ugly dependencies though.
+# - Clean up deprecated functions
+
 import tkinter as tk
 import sys
 import os
@@ -47,7 +51,15 @@ def cls(*var_names):
 def add_path(pathname=''):
 	sys.path.append(os.getcwd()+'/'+pathname)
 	
-def debug():
+# Should this really be here?
+add_path('nn')
+	
+def debug(): # don't think this works right
+	""" Stops execution mid-line and updates variable pane, allowing viewable
+		of program progress and access to variables through terminal.
+		
+		Right now, progrress doesn't continue after
+	"""
 	global terminal,__nonlocals
 	if terminal is None:
 		raise BuiltinFunctionException("Misconfigured debug-mode")
@@ -61,11 +73,14 @@ def debug():
 	entry.pack(side='top',expand=1,fill='both')
 	
 	toplevel.mainloop()
+		
 	
 def view():
 	""" Produces a popup view of the variable graph
 
 		FIXME: INCOMPLETE
+		
+		EDIT: there is now other functionality that does this
 	"""
 	win = tk.Toplevel()
 	global __locals

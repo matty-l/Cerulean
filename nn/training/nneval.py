@@ -18,11 +18,8 @@ def nneval( nn, loss, train_x, train_y, val_x=None, val_y=None):
 	nn.testing = 1
 	# training performance
 	nn = nn.copy() # don't change the input nn
-	# print('starting')
 	feedforward( nn, train_x, train_y )
 	loss.train.e.append( nn.L )
-	# print("stopping")
-	# exit()
 	
 	# validation performance
 	if nargin == 6:
@@ -33,11 +30,11 @@ def nneval( nn, loss, train_x, train_y, val_x=None, val_y=None):
 	
 	# calc miscalssification rate if softmax
 	if nn.output == 'softmax':
-		(er_train, _) = nntest(nn,train_x,train_y)
+		(er_train, _) = nntest(nn,train_x,train_y,ff=0)
 		loss.train.e_frac.append( er_train )
 		
 		if nargin == 6:
-			(er_val,_) = nntest(nn,val_x,val_y)
+			(er_val,_) = nntest(nn,val_x,val_y,ff=0)
 			loss.val.e_frac.append( er_val )
 			
 			

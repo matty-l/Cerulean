@@ -5,7 +5,7 @@
 	Date: 02/02/2015
 """
 
-from numpy import shape, array, ones, mean, sum, log, exp, max
+from numpy import array, ones, mean, sum, log, exp, max
 from numpy.random import random as rand
 
 from utils.utils import addBias
@@ -14,6 +14,8 @@ from utils.utils import addBias
 # Notes on performance:						 #
 # Using utils.utils.add: 11.2444s			 #
 # Using utils.utils.addBias: 4.4405s		 #
+# Using CeLinalg.dot in out: 4.3231s  		 #
+# Using CeLinalg.dot in activations: 1.6796  #
 # ------------------------------------------ #
 
 def feedforward(nn,x,y):
@@ -61,7 +63,7 @@ def feedforward(nn,x,y):
 if __name__ == '__main__':
 	from scipy.io import loadmat
 	from scipy.misc import toimage
-	from nnsetup import nnsetup
+	from setup import NeuralNetwork as nnsetup
 	
 	print("Loading data...")
 	result = loadmat('mnist_uint8.mat')
@@ -71,7 +73,12 @@ if __name__ == '__main__':
 	y = result['train_y'].astype(float)
 
 	print("Propogating")
-	nnff(nn,x,y)
+	
+	import time
+	t0 = time.time()
+	feedforward(nn,x,y)
+	print(time.time() - t0)
+	exit(1)
 	
 	level = 'third'
 	

@@ -9,7 +9,8 @@
 from abc import ABCMeta, abstractmethod
 from utils.utils import Overrides
 from numpy import tanh, exp
-
+from linalg.CeLinalg import dot as cdot
+# from numpy import dot as ndot
 
 class ActivationFunctionImpl(object):
 
@@ -30,11 +31,11 @@ class SigmActivation(ActivationFunctionImpl):
 	@Overrides(ActivationFunctionImpl)
 	def feedforward( self, layer, weights ):
 		sigm = lambda P : 1 / (1+exp(-P))
-		return sigm(layer.dot(weights.transpose()))
+		return sigm(cdot(layer,weights.transpose()))
 		
 class TanhOptActivation(ActivationFunctionImpl):
 	
 	@Overrides(ActivationFunctionImpl)
 	def feedforward(self, layer, weights):
 		tanh_opt = lambda A : 1.7159 * tanh( 2/3 * A )
-		return tanh_opt(layer.dot(weights.transpose()))
+		return tanh_opt(cdot(layer,weights.transpose()))

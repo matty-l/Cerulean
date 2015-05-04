@@ -11,10 +11,10 @@ from  utils.utils import size
 
 __verbose__ = 1
 
-def nntest(nn,x,y):
+def nntest(nn,x,y,ff=1):
 	""" Tests the neural network
 	"""
-	labels = nnpredict(nn,x)
+	labels = nnpredict(nn,x,ff=ff)
 	expected = y.argmax(1)
 	bad = [ label != expect for label,expect in zip(labels,expected) ]
 	if __verbose__:

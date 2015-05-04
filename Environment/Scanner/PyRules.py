@@ -88,6 +88,7 @@ rules = [
 			Rule('\n',PyTokenType.new_line),
 
 			Rule('self',PyTokenType.keyword, style='self_style'),
+			Rule('assert',PyTokenType.keyword, style='self_style'), # own style?
 			
 			Rule('(False)|(class)|(finally)|(is)|(None)|(contine)|(for)'+
 				 '|(lambda)|(True)|(def)|(from)|(nonlocal)|(and)|(del)|'+
@@ -196,5 +197,3 @@ if __name__ == '__main__':
 			test_numericals()
 		else:
 			print("No rule for",sys.argv[1])
-	
-		
